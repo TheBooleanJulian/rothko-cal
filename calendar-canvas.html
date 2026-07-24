@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rothko Cal — W30</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root{
+    --void:#050508;
+    --panel:#0a0e14;
+    --line:#1a1e26;
+    --teal:#00D4C8;
+    --gold:#F5C842;
+    --ink:#e8e6e0;
+    --dim:#5b6270;
+
+    --c-office:#4b5563;
+    --c-market:#2f6f6b;
+    --c-photog:#00D4C8;
+    --c-tut:#c99a3c;
+    --c-bni:#d64933;
+    --c-personal:#9b5de5;
+    --c-medical:#1f8a7d;
+
+    --scarlet:#ff3b30;
+    --mandarin:#f2924a;
+    --topaz:#e8c073;
+    --wasabi:#8ba33f;
+    --turquoise:#2fd0c4;
+    --fuchsia:#c44fd1;
+    --silhouette:#4a4d55;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  body{
+    background:var(--void);
+    color:var(--ink);
+    font-family:'Space Grotesk',sans-serif;
+    min-height:100vh;
+    padding:48px 5vw 80px;
+  }
+
+  .masthead{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    border-bottom:1px solid var(--line);
+    padding-bottom:22px;
+    margin-bottom:6px;
+  }
+  .masthead-left{display:flex; align-items:baseline; gap:18px;}
+  .year{
+    font-size:22px;
+    letter-spacing:0.1em;
+    color:var(--dim);
+    font-family:'JetBrains Mono',monospace;
+    font-weight:500;
+  }
+  .month{
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+  }
+  .weeknum{
+    font-family:'JetBrains Mono',monospace;
+    font-size:22px;
+    font-weight:400;
+    color:var(--void);
+    background:var(--teal);
+    padding:4px 16px;
+    letter-spacing:0.04em;
+  }
+  .datefmt{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    font-weight:400;
+    color:var(--dim);
+    text-align:right;
+    line-height:1.6;
+  }
+  .datefmt span{color:var(--ink);}
+
+  /* ---- canvas ---- */
+  .canvas-wrap{
+    margin-top:28px;
+    display:grid;
+    grid-template-columns:34px repeat(7,1fr);
+  }
+  .hour-axis{
+    position:relative;
+    height:820px;
+  }
+  .hour-tick{
+    position:absolute;
+    left:0;
+    font-family:'JetBrains Mono',monospace;
+    font-size:9px;
+    color:var(--dim);
+    transform:translateY(-50%);
+  }
+
+  .day-col{
+    position:relative;
+    border-left:0px solid var(--line);
+  }
+  .day-col:last-child{border-right:0px solid var(--line);}
+
+  .mood-strip{
+    height:6px;
+    width:100%;
+  }
+
+  .track{
+    position:relative;
+    height:820px;
+  }
+
+  .block{
+    position:absolute;
+    border-radius:2px;
+    opacity:0.94;
+    transition:opacity .15s, transform .15s;
+    cursor:default;
+  }
+  .block:hover{
+    opacity:1;
+    transform:scale(1.01);
+    z-index:5;
+    box-shadow:0 0 0 1px rgba(255,255,255,0.25);
+  }
+
+  .tooltip{
+    position:fixed;
+    pointer-events:none;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;
+    color:var(--ink);
+    background:var(--panel);
+    border:1px solid var(--line);
+    padding:5px 9px;
+    letter-spacing:0.03em;
+    opacity:0;
+    transition:opacity .12s;
+    z-index:50;
+    white-space:nowrap;
+  }
+  .tooltip.show{opacity:1;}
+
+  .day-labels{
+    display:grid;
+    grid-template-columns:34px repeat(7,1fr);
+    margin-top:10px;
+  }
+  .day-label{
+    text-align:center;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    color:var(--dim);
+    letter-spacing:0.1em;
+  }
+
+  /* ---- footer / concept note ---- */
+  .footer{
+    margin-top:64px;
+    padding-top:24px;
+    border-top:1px solid var(--line);
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:40px;
+  }
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px;
+  }
+  .legend-item{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;
+    color:var(--dim);
+  }
+  .swatch{width:9px; height:9px; border-radius:1px; flex-shrink:0;}
+
+  .archive-note{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;
+    color:var(--dim);
+    max-width:280px;
+    line-height:1.6;
+    text-align:right;
+  }
+  .archive-note b{color:var(--teal); font-weight:500;}
+
+  /* ---- journal shelf ---- */
+  .shelf-heading{
+    margin-top:80px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    border-bottom:1px solid var(--line);
+    padding-bottom:14px;
+  }
+  .shelf-heading h2{
+    font-size:20px;
+    font-weight:500;
+  }
+  .shelf-heading span{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;
+    color:var(--dim);
+  }
+  .shelf{
+    margin-top:22px;
+    display:grid;
+    grid-template-columns:repeat(13,1fr);
+    gap:6px;
+  }
+  .page-item{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+  }
+  .page{
+    aspect-ratio:7/9;
+    background:var(--panel);
+    border:1px solid var(--line);
+    position:relative;
+    overflow:hidden;
+  }
+  .page .p-block{
+    position:absolute;
+    border-radius:1px;
+    opacity:.92;
+  }
+  .page-num{
+    text-align:center;
+    font-family:'JetBrains Mono',monospace;
+    font-size:9px;
+    color:var(--dim);
+    letter-spacing:0.04em;
+  }
+</style>
+</head>
+<body>
+
+  <div class="masthead">
+    <div class="masthead-left">
+      <div class="year">2026</div>
+      <div class="month">July</div>
+    </div>
+    <div class="weeknum">W30</div>
+  </div>
+  <div class="datefmt" style="text-align:left; margin-bottom:20px;">Jul 19 — Jul 25</div>
+
+  <div class="canvas-wrap" id="canvasWrap">
+    <div class="hour-axis" id="hourAxis"></div>
+    <!-- day columns injected by JS -->
+  </div>
+
+  <div class="day-labels" id="dayLabels"></div>
+
+  <div class="footer">
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="shelf-heading">
+    <h2>The shelf</h2>
+    <span>52 pages / year</span>
+  </div>
+  <div class="shelf" id="shelf"></div>
+
+  <div class="tooltip" id="tooltip"></div>
+
+<script>
+const HOURS_START = 7, HOURS_END = 23; // 16hr window
+const TRACK_H = 820;
+
+const COLORS = {
+  office:   getVar('--c-office'),
+  market:   getVar('--c-market'),
+  photog:   getVar('--c-photog'),
+  tut:      getVar('--c-tut'),
+  bni:      getVar('--c-bni'),
+  personal: getVar('--c-personal'),
+  medical:  getVar('--c-medical'),
+};
+function getVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+const MOODS = ['--scarlet','--mandarin','--topaz','--wasabi','--turquoise','--fuchsia','--silhouette'];
+const DAY_NAMES = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+const DAY_DATES = [19,20,21,22,23,24,25];
+
+// mock week — approximating the density/rhythm of a real packed week
+const WEEK = [
+  [ {s:11,e:19,c:'market'} ],
+  [ {s:9.5,e:12,c:'office'}, {s:14.5,e:16.5,c:'tut'}, {s:17.5,e:19.5,c:'tut'}, {s:20.5,e:21.5,c:'personal'} ],
+  [ {s:9.5,e:11,c:'photog'}, {s:10,e:10.5,c:'tut',x:1}, {s:10.5,e:11,c:'tut',x:1}, {s:12,e:13,c:'tut'}, {s:12,e:13,c:'tut',x:1},
+    {s:14,e:15,c:'photog'}, {s:14,e:15,c:'personal',x:1}, {s:15,e:16,c:'medical'}, {s:16.75,e:18.75,c:'tut'} ],
+  [ {s:9.5,e:10.5,c:'tut'}, {s:9.5,e:10.5,c:'photog',x:1}, {s:15,e:17,c:'photog'}, {s:16.5,e:18.5,c:'tut'}, {s:20.5,e:22,c:'photog'} ],
+  [ {s:8,e:12,c:'bni'}, {s:14.5,e:16.5,c:'tut'}, {s:18.5,e:21.5,c:'tut'} ],
+  [ {s:14.5,e:17.5,c:'tut'}, {s:18,e:20,c:'tut'}, {s:21.5,e:22,c:'photog'} ],
+  [ {s:10,e:11,c:'photog'}, {s:12,e:15,c:'photog'}, {s:14,e:16,c:'tut'}, {s:18.5,e:20.5,c:'photog'} ],
+];
+const MOOD_IDX = [0,1,2,3,4,5,6]; // scarlet..silhouette across the week
+
+// ---- render hour axis ----
+const axis = document.getElementById('hourAxis');
+for(let h=HOURS_START; h<=HOURS_END; h+=2){
+  const top = ((h-HOURS_START)/(HOURS_END-HOURS_START))*TRACK_H;
+  const tick = document.createElement('div');
+  tick.className='hour-tick';
+  tick.style.top = top+'px';
+  tick.textContent = String(h).padStart(2,'0');
+  axis.appendChild(tick);
+}
+
+// ---- render columns ----
+const wrap = document.getElementById('canvasWrap');
+const tooltip = document.getElementById('tooltip');
+const legendData = {};
+
+WEEK.forEach((events, dayIdx)=>{
+  const col = document.createElement('div');
+  col.className = 'day-col';
+
+  const mood = document.createElement('div');
+  mood.className = 'mood-strip';
+  mood.style.background = `var(${MOODS[MOOD_IDX[dayIdx]]})`;
+  col.appendChild(mood);
+
+  const track = document.createElement('div');
+  track.className = 'track';
+
+  // group overlaps by x
+  events.forEach(ev=>{
+    const top = ((ev.s-HOURS_START)/(HOURS_END-HOURS_START))*TRACK_H;
+    const height = Math.max(((ev.e-ev.s)/(HOURS_END-HOURS_START))*TRACK_H, 3);
+    const lanes = ev.x !== undefined ? 2 : 1;
+    const laneW = 100/lanes;
+    const laneX = ev.x || 0;
+
+    const b = document.createElement('div');
+    b.className = 'block';
+    b.style.top = top+'px';
+    b.style.height = height+'px';
+    b.style.left = (laneX*laneW)+'%';
+    b.style.width = (laneW-3)+'%';
+    b.style.background = COLORS[ev.c];
+    b.addEventListener('mousemove', e=>{
+      tooltip.textContent = `${DAY_NAMES[dayIdx]} ${DAY_DATES[dayIdx]} · ${fmtHour(ev.s)}–${fmtHour(ev.e)} · ${ev.c}`;
+      tooltip.style.left = (e.clientX+14)+'px';
+      tooltip.style.top = (e.clientY+14)+'px';
+      tooltip.classList.add('show');
+    });
+    b.addEventListener('mouseleave', ()=> tooltip.classList.remove('show'));
+    track.appendChild(b);
+    legendData[ev.c] = true;
+  });
+
+  col.appendChild(track);
+  wrap.appendChild(col);
+});
+
+function fmtHour(h){
+  const hh = Math.floor(h);
+  const mm = (h%1)*60;
+  return String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');
+}
+
+// day labels
+const dayLabels = document.getElementById('dayLabels');
+dayLabels.appendChild(document.createElement('div'));
+DAY_NAMES.forEach((d,i)=>{
+  const el = document.createElement('div');
+  el.className = 'day-label';
+  el.textContent = `${d} ${DAY_DATES[i]}`;
+  dayLabels.appendChild(el);
+});
+
+// legend
+const legend = document.getElementById('legend');
+const LABELS = {office:'office',market:'event/market',photog:'photog',tut:'tutoring',bni:'BNI',personal:'personal',medical:'medical'};
+Object.keys(legendData).forEach(key=>{
+  const item = document.createElement('div');
+  item.className = 'legend-item';
+  item.innerHTML = `<span class="swatch" style="background:${COLORS[key]}"></span>${LABELS[key]}`;
+  legend.appendChild(item);
+});
+
+// ---- shelf: 13 mini past-week thumbnails (quarter of a year, for mockup) ----
+const shelf = document.getElementById('shelf');
+const palette = Object.values(COLORS);
+for(let w=18; w<=30; w++){
+  const item = document.createElement('div');
+  item.className='page-item';
+
+  const page = document.createElement('div');
+  page.className='page';
+  const n = 5 + Math.floor(Math.random()*5);
+  for(let i=0;i<n;i++){
+    const b = document.createElement('div');
+    b.className='p-block';
+    const left = Math.random()*85;
+    const top = Math.random()*85;
+    b.style.left = left+'%';
+    b.style.top = top+'%';
+    b.style.width = (8+Math.random()*22)+'%';
+    b.style.height = (6+Math.random()*20)+'%';
+    b.style.background = palette[Math.floor(Math.random()*palette.length)];
+    page.appendChild(b);
+  }
+  if(w===30) page.style.borderColor = 'var(--teal)';
+
+  const num = document.createElement('div');
+  num.className='page-num';
+  num.textContent = 'W'+w;
+
+  item.appendChild(page);
+  item.appendChild(num);
+  shelf.appendChild(item);
+}
+</script>
+</body>
+</html>
