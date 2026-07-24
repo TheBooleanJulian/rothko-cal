@@ -1,16 +1,46 @@
+<div align="center">
+
 # Rothko Cal
 
-Rothko Cal is a small personal planning toolkit for turning a Google Calendar into a more intentional, visual system. It combines:
+**A visual planning toolkit for turning Google Calendar into an intentional, legible system.**
 
-- a dark, editorial-style calendar canvas for viewing weeks at a glance
-- a Python workflow for backfilling historical events into clearer category calendars
-- a color-mapping reference for separating category and status visually
+![Version](https://img.shields.io/badge/version-0.2.0-00D4C8)
+![Python](https://img.shields.io/badge/-Python-3776AB?logo=python&logoColor=white)
+![HTML](https://img.shields.io/badge/-HTML-E34F26?logo=html5&logoColor=white)
+![License](https://img.shields.io/badge/license-AGPLv3%20%2F%20Commercial-00D4C8.svg)
 
-## What’s in this project
+</div>
 
-- `calendar-canvas.html` — a standalone HTML calendar visualization with a weekly, mood-board-like layout.
-- `backfill_calendar_categories.py` — a Google Calendar migration helper that reviews and moves historical events into category-specific calendars.
-- `CALENDAR_COLORS.md` — documentation for how calendar-level categories and event-level statuses are mapped to colors.
+---
+
+## What it does
+
+Rothko Cal is a small personal planning toolkit for making Google Calendar more intentional and visual. It provides a dark, editorial-style weekly canvas for viewing time at a glance, a Python script for migrating historical events into cleaner category calendars, and a color-mapping reference for separating category and status visually. It's built for individuals who want their calendar to feel more legible and structurally durable.
+
+## Features
+
+- Weekly mood-board-style calendar canvas in a single standalone HTML file
+- Google Calendar backfill script for reviewing and moving historical events into category-specific calendars
+- Color-mapping documentation separating calendar-level categories from event-level statuses
+
+## Tech Stack
+
+| Layer | Choice |
+|---|---|
+| Canvas | Single-file HTML |
+| Backfill script | Python |
+
+## Project Structure
+
+```
+rothko-cal/
+|-- calendar-canvas.html
+|-- backfill_calendar_categories.py
+|-- CALENDAR_COLORS.md
+|-- COMMERCIAL-LICENSE.md
+|-- LICENSE
+`-- README.md
+```
 
 ## Quick overview
 
@@ -26,19 +56,20 @@ This repository uses a simple major/minor version format:
 - the first number increases for major milestones or structural changes
 - the second number increases for minor feature updates, workflow improvements, or documentation refinements
 
-## Changelog
+## Status / Roadmap
 
-### v0.1.0 — Initial release
-- Added the calendar canvas experience in `calendar-canvas.html`
-- Added the Google Calendar backfill script for moving historical events into category calendars
-- Added color-mapping documentation for category vs status distinctions
+**Done**
 
-### v0.2.0 — Documentation and workflow refinement
-- Clarified the category and status color model
-- Improved the project structure around the backfill workflow
-- Added a repository README with changelog and roadmap guidance
+- [x] Standalone weekly calendar canvas (`calendar-canvas.html`)
+- [x] Google Calendar backfill/migration script
+- [x] Color-mapping reference for category vs status
 
-## Future roadmap
+**Planned / Suggestions**
+
+- Move category rules out of hardcoded script values into a JSON or YAML config file
+- Add a simple visual review UI for approving or rejecting backfill actions
+- Add automated tests for the backfill logic and category matching rules
+- No `.env.example` or config scaffolding present despite the script likely requiring Google Calendar credentials
 
 ### Near-term ideas
 - Add a configuration file for category rules instead of relying on hardcoded values in the Python script
@@ -63,12 +94,24 @@ If you want to keep momentum, the best next move would be:
 2. add a simple review UI for the backfill workflow
 3. introduce a more polished weekly view with better filtering and event metadata
 
+## Changelog
+
+### v0.2.0 — Documentation and workflow refinement
+- Clarified the category and status color model
+- Improved the project structure around the backfill workflow
+- Added a repository README with changelog and roadmap guidance
+
+### v0.1.0 — Initial release
+- Added the calendar canvas experience in `calendar-canvas.html`
+- Added the Google Calendar backfill script for moving historical events into category calendars
+- Added color-mapping documentation for category vs status distinctions
+
 ## License
 
-This project is dual licensed.
+Dual licensed:
 
 - **Community Edition** — [GNU Affero General Public License v3 (AGPLv3)](LICENSE). Free to use, modify, and self-host. If you distribute a modified version or run it as a network service, you must make the corresponding source available.
-- **Commercial License** — for organisations that want to embed, modify, or distribute this software without AGPLv3's obligations. See [COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md).
+- **Commercial License** — for organisations wanting to embed or distribute without AGPLv3 obligations. See [COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md).
 
 ---
 
