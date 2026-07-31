@@ -83,18 +83,19 @@ def test_build_week_events_maps_category_and_status_color():
     assert tut["statusColor"] is None
 
 
-def test_build_week_events_skips_all_day_and_unconfigured_calendars():
+def test_build_week_events_skips_all_day_and_falls_back_unconfigured_calendars():
     events_by_calendar = {
         "cal-market": [
             {"summary": "All day thing", "start": {"date": "2026-07-19"}, "end": {"date": "2026-07-20"}},
         ],
         "cal-unknown": [
-            {"summary": "Should be ignored", "start": {"dateTime": "2026-07-19T10:00:00+08:00"},
+            {"summary": "Should default to calendar name", "start": {"dateTime": "2026-07-19T10:00:00+08:00"},
              "end": {"dateTime": "2026-07-19T11:00:00+08:00"}},
         ],
     }
     events = build_week_events(events_by_calendar, CALENDAR_LIST, CATEGORY_CONFIG, COLORS, WEEK_START)
-    assert events == []
+    assert len(events) == 1
+    assert events[0]["category"] == "Calendar"  # no summary in CALENDAR_LIST entry for cal-unknown, falls back to default
 
 
 def test_bucket_events_into_weeks_groups_by_week_offset():

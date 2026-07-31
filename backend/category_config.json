@@ -1,4 +1,4 @@
 {
   "primary": { "label": "Personal", "order": 0 },
-  "_comment": "Map real Google calendarIds to a friendly category label + display order. Replace the 'primary' entry and add one per calendar created following CALENDAR_COLORS.md. Calendars not listed here are ignored by /api/events and /api/weeks-summary."
+  "_comment": "Map real Google calendarIds to a friendly category label + display order. Replace the 'primary' entry and add one per calendar created following CALENDAR_COLORS.md. Calendars not listed here still show up, using their own Google calendar name as the category."
 }

@@ -10,6 +10,18 @@ def real_category_config(raw_config):
     return {k: v for k, v in raw_config.items() if not k.startswith("_")}
 
 
+def resolve_category(calendar_id: str, calendar_entry: dict, category_config: dict) -> dict:
+    """Look up the configured category, or fall back to the calendar's own name.
+
+    category_config.json only has entries for calendars someone explicitly mapped
+    (e.g. the deploy owner's). Other users' calendars fall back to their Google
+    calendar name so the app is usable without per-user config.
+    """
+    if calendar_id in category_config:
+        return category_config[calendar_id]
+    return {"label": calendar_entry.get("summary", "Calendar"), "order": 999}
+
+
 def decimal_hour(dt: datetime) -> float:
     return dt.hour + dt.minute / 60 + dt.second / 3600
 
@@ -76,10 +88,8 @@ def build_week_events(events_by_calendar: dict, calendar_list: list, category_co
 
     normalized = []
     for calendar_id, events in events_by_calendar.items():
-        if calendar_id not in category_config:
-            continue
-        cfg = category_config[calendar_id]
         entry = calendar_entries.get(calendar_id, {})
+        cfg = resolve_category(calendar_id, entry, category_config)
         category_color = resolve_category_color(calendar_id, calendar_colors, entry)
         for event in events:
             item = normalize_event(event, calendar_id, cfg["label"], category_color, event_colors, week_start)
@@ -102,8 +112,6 @@ def bucket_events_into_weeks(events_by_calendar: dict, calendar_list: list, cate
     ]
 
     for calendar_id, events in events_by_calendar.items():
-        if calendar_id not in category_config:
-            continue
         entry = calendar_entries.get(calendar_id, {})
         category_color = resolve_category_color(calendar_id, calendar_colors, entry)
         for event in events:

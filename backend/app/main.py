@@ -12,11 +12,12 @@ from .normalize import bucket_events_into_weeks, build_week_events, real_categor
 
 app = FastAPI(title="Rothko Cal API")
 
+_IS_HTTPS = config.GOOGLE_REDIRECT_URI.startswith("https://")
 app.add_middleware(
     SessionMiddleware,
     secret_key=config.SESSION_SECRET,
-    same_site="lax",
-    https_only=config.GOOGLE_REDIRECT_URI.startswith("https://"),
+    same_site="none" if _IS_HTTPS else "lax",
+    https_only=_IS_HTTPS,
 )
 app.add_middleware(
     CORSMiddleware,
@@ -37,9 +38,7 @@ def week_bounds(week_start: date) -> tuple[str, str]:
 
 @app.get("/api/calendars")
 def get_calendars(credentials: Credentials = Depends(get_credentials)):
-    category_config = real_category_config(config.load_category_config())
-    calendars = calendar_client.list_calendars(credentials)
-    return [c for c in calendars if c["id"] in category_config]
+    return calendar_client.list_calendars(credentials)
 
 
 @app.get("/api/colors")
@@ -56,7 +55,7 @@ def get_events(weekStart: str, credentials: Credentials = Depends(get_credential
 
     time_min, time_max = week_bounds(week_start)
     events_by_calendar = calendar_client.fetch_events_for_calendars(
-        credentials, list(category_config.keys()), time_min, time_max
+        credentials, [c["id"] for c in calendar_list], time_min, time_max
     )
 
     events = build_week_events(events_by_calendar, calendar_list, category_config, colors, week_start)
@@ -74,7 +73,7 @@ def get_weeks_summary(end: str, count: int = 13, credentials: Credentials = Depe
     time_min = datetime.combine(range_start, datetime.min.time()).isoformat() + "Z"
     time_max = (datetime.combine(range_end, datetime.min.time()) + timedelta(days=7)).isoformat() + "Z"
     events_by_calendar = calendar_client.fetch_events_for_calendars(
-        credentials, list(category_config.keys()), time_min, time_max
+        credentials, [c["id"] for c in calendar_list], time_min, time_max
     )
 
     weeks = bucket_events_into_weeks(events_by_calendar, calendar_list, category_config, colors, range_start, count)
