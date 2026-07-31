@@ -12,7 +12,7 @@ export default function Shelf({ currentWeekStart }) {
   useEffect(() => {
     let cancelled = false;
     api
-      .weeksSummary(toISODate(currentWeekStart), 13)
+      .weeksSummary(toISODate(currentWeekStart), 5)
       .then((data) => {
         if (cancelled) return;
         if (data.unauthenticated) {
@@ -34,7 +34,7 @@ export default function Shelf({ currentWeekStart }) {
     <>
       <div className="shelf-heading">
         <h2>The shelf</h2>
-        <span>{weeks.length} pages / quarter</span>
+        <span>{weeks.length} pages / current + past 4 weeks</span>
       </div>
       <div className="shelf">
         {weeks.map((week, i) => {

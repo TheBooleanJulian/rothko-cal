@@ -192,8 +192,35 @@ body{
   font-family:'JetBrains Mono',monospace;
   font-size:10.5px;
   color:var(--dim);
+  background:transparent;
+  border:none;
+  padding:0;
+  cursor:pointer;
 }
+.legend-item:not(:disabled):hover{color:var(--ink);}
+.legend-item:disabled{cursor:default;}
+.legend-item-hidden{opacity:0.4;}
+.legend-item-hidden .swatch{background:var(--dim) !important;}
 .swatch{width:9px; height:9px; border-radius:1px; flex-shrink:0;}
+
+.export-bar{
+  display:flex;
+  gap:6px;
+  margin-top:10px;
+  justify-content:flex-end;
+}
+.export-bar button{
+  background:transparent;
+  border:1px solid var(--line);
+  color:var(--dim);
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  letter-spacing:0.06em;
+  padding:4px 10px;
+  cursor:pointer;
+}
+.export-bar button:hover:not(:disabled){border-color:var(--teal); color:var(--teal);}
+.export-bar button:disabled{opacity:0.5; cursor:default;}
 
 /* ---- journal shelf ---- */
 .shelf-heading{
@@ -217,7 +244,7 @@ body{
 .shelf{
   margin-top:22px;
   display:grid;
-  grid-template-columns:repeat(13,1fr);
+  grid-template-columns:repeat(5,1fr);
   gap:6px;
 }
 .page-item{

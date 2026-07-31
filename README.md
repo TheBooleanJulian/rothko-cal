@@ -4,7 +4,7 @@
 
 **A visual planning toolkit for turning Google Calendar into an intentional, legible system.**
 
-![Version](https://img.shields.io/badge/version-0.3.0-00D4C8)
+![Version](https://img.shields.io/badge/version-0.4.0-00D4C8)
 ![Python](https://img.shields.io/badge/-Python-3776AB?logo=python&logoColor=white)
 ![React](https://img.shields.io/badge/-React-61DAFB?logo=react&logoColor=black)
 ![License](https://img.shields.io/badge/license-AGPLv3%20%2F%20Commercial-00D4C8.svg)
@@ -22,10 +22,13 @@ The original single-file HTML mockup (`calendar-canvas.html`) is kept in the rep
 ## Features
 
 - Weekly mood-board-style calendar canvas, now driven by live Google Calendar data instead of a mockup
-- "The shelf" — a strip of the last 13 weeks rendered as tiny thumbnails, aggregated server-side from real events
+- Timezone-aware week boundaries — the browser's IANA timezone is sent with every request so events land in the correct local day
+- "The shelf" — a strip of the current week plus the past 4 weeks rendered as tiny thumbnails, aggregated server-side from real events
+- Toggleable calendar legend — click any category other than "Personal" to hide/show its events on the canvas
+- Export the week canvas or the shelf to PNG, JPG, or SVG
 - Google sign-in gate (per-session OAuth, read-only Calendar access)
 - Google Calendar backfill script for reviewing and moving historical events into category-specific calendars
-- Color-mapping documentation separating calendar-level categories from event-level statuses, now sourced live from `colors().get()` rather than hardcoded hex values
+- Color-mapping documentation separating calendar-level categories from event-level statuses, sourced live from `colors().get()` rather than hardcoded hex values
 
 ## Tech Stack
 
@@ -120,17 +123,21 @@ This repository uses a simple major/minor version format:
 - [x] Category config moved to `backend/category_config.json` (JSON, no code changes needed)
 - [x] Google Calendar backfill/migration script
 - [x] Color-mapping reference for category vs status
+- [x] Fixed timezone/date-boundary bug that could bucket events into the wrong day column
+- [x] Let the frontend filter/toggle which categories are visible in the week view
+- [x] Export the week canvas / shelf to PNG, JPG, or SVG
+- [x] Shelf trimmed to current week + past 4 weeks (was 13)
 
 **Planned / Suggestions**
 
 - Add a simple visual review UI for approving or rejecting backfill actions
 - Add automated tests for the backfill logic and category matching rules
 - Add a `.env.example` / config scaffolding equivalent for the backfill script itself (the web app already has one)
+- Different art display aesthetics (eg paintbrush strokes, solid colour blocks, textured blocks, etc)
 
 ### Near-term ideas
 - Add an export/import workflow for saved category mappings and review decisions
 - Add a simple review dashboard for approving or rejecting backfill actions visually
-- Let the frontend filter/toggle which categories are visible in the week view
 
 ### Medium-term ideas
 - Add support for recurring-event handling and smarter batch review in the backfill script
@@ -145,11 +152,18 @@ This repository uses a simple major/minor version format:
 
 If you want to keep momentum, the best next move would be:
 
-1. add category/status filtering to the week view
-2. add a simple review UI for the backfill workflow
-3. add automated tests for the backfill script's category matching rules
+1. add a simple review UI for the backfill workflow
+2. add automated tests for the backfill script's category matching rules
+3. add an export/import workflow for saved category mappings and review decisions
 
 ## Changelog
+
+### v0.4.0 — Timezone fix, calendar toggles, and export
+- Fixed a date-boundary bug where events could be bucketed into the wrong day column: `toISODate` was converting to UTC before slicing, and the backend was querying Google Calendar with the local week-start date incorrectly stamped as UTC
+- The frontend now sends the browser's IANA timezone with every request; the backend uses it to build correctly-offset query windows via `zoneinfo`
+- The week legend is now interactive — click any category other than "Personal" to hide/show its events on the canvas
+- Added PNG/JPG/SVG export for both the week canvas and the shelf
+- The shelf now shows the current week plus the past 4 weeks (was 13)
 
 ### v0.3.0 — Real backend and frontend
 - Added a FastAPI backend (`backend/`) that authenticates with Google OAuth (login-gated, per-session) and serves normalized event/color data from the live Calendar API

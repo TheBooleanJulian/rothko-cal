@@ -1,4 +1,5 @@
 from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -30,10 +31,11 @@ app.add_middleware(
 app.include_router(auth_router)
 
 
-def week_bounds(week_start: date) -> tuple[str, str]:
-    time_min = datetime.combine(week_start, datetime.min.time()).isoformat() + "Z"
-    time_max = (datetime.combine(week_start, datetime.min.time()) + timedelta(days=7)).isoformat() + "Z"
-    return time_min, time_max
+def week_bounds(week_start: date, tz: str) -> tuple[str, str]:
+    zone = ZoneInfo(tz)
+    start_dt = datetime.combine(week_start, datetime.min.time(), tzinfo=zone)
+    end_dt = start_dt + timedelta(days=7)
+    return start_dt.isoformat(), end_dt.isoformat()
 
 
 @app.get("/api/calendars")
@@ -47,13 +49,13 @@ def get_colors(credentials: Credentials = Depends(get_credentials)):
 
 
 @app.get("/api/events")
-def get_events(weekStart: str, credentials: Credentials = Depends(get_credentials)):
+def get_events(weekStart: str, tz: str = "UTC", credentials: Credentials = Depends(get_credentials)):
     week_start = date.fromisoformat(weekStart)
     category_config = real_category_config(config.load_category_config())
     calendar_list = calendar_client.list_calendars(credentials)
     colors = calendar_client.get_colors(credentials)
 
-    time_min, time_max = week_bounds(week_start)
+    time_min, time_max = week_bounds(week_start, tz)
     events_by_calendar = calendar_client.fetch_events_for_calendars(
         credentials, [c["id"] for c in calendar_list], time_min, time_max
     )
@@ -63,15 +65,16 @@ def get_events(weekStart: str, credentials: Credentials = Depends(get_credential
 
 
 @app.get("/api/weeks-summary")
-def get_weeks_summary(end: str, count: int = 13, credentials: Credentials = Depends(get_credentials)):
+def get_weeks_summary(end: str, count: int = 5, tz: str = "UTC", credentials: Credentials = Depends(get_credentials)):
     range_end = date.fromisoformat(end)
     range_start = range_end - timedelta(weeks=count - 1)
     category_config = real_category_config(config.load_category_config())
     calendar_list = calendar_client.list_calendars(credentials)
     colors = calendar_client.get_colors(credentials)
 
-    time_min = datetime.combine(range_start, datetime.min.time()).isoformat() + "Z"
-    time_max = (datetime.combine(range_end, datetime.min.time()) + timedelta(days=7)).isoformat() + "Z"
+    zone = ZoneInfo(tz)
+    time_min = datetime.combine(range_start, datetime.min.time(), tzinfo=zone).isoformat()
+    time_max = (datetime.combine(range_end, datetime.min.time(), tzinfo=zone) + timedelta(days=7)).isoformat()
     events_by_calendar = calendar_client.fetch_events_for_calendars(
         credentials, [c["id"] for c in calendar_list], time_min, time_max
     )

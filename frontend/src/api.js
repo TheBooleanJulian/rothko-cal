@@ -1,4 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 async function apiGet(path) {
   const res = await fetch(`${API_URL}${path}`, { credentials: "include" });
@@ -15,6 +16,7 @@ export const api = {
   loginUrl: `${API_URL}/auth/login`,
   me: () => apiGet("/auth/me"),
   logout: () => fetch(`${API_URL}/auth/logout`, { credentials: "include" }),
-  events: (weekStart) => apiGet(`/api/events?weekStart=${weekStart}`),
-  weeksSummary: (end, count = 13) => apiGet(`/api/weeks-summary?end=${end}&count=${count}`),
+  events: (weekStart) => apiGet(`/api/events?weekStart=${weekStart}&tz=${encodeURIComponent(TZ)}`),
+  weeksSummary: (end, count = 5) =>
+    apiGet(`/api/weeks-summary?end=${end}&count=${count}&tz=${encodeURIComponent(TZ)}`),
 };

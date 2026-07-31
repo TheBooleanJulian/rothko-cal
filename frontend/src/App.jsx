@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./styles/canvas.css";
 import { api } from "./api";
 import { addDays, startOfWeek, toISODate } from "./dateUtils";
@@ -7,12 +7,33 @@ import Masthead from "./components/Masthead";
 import WeekCanvas from "./components/WeekCanvas";
 import Legend from "./components/Legend";
 import Shelf from "./components/Shelf";
+import ExportBar from "./components/ExportBar";
 
 export default function App() {
   const [authState, setAuthState] = useState({ loading: true, authenticated: false, user: null });
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [events, setEvents] = useState([]);
   const [eventsError, setEventsError] = useState(null);
+  const [hiddenCategories, setHiddenCategories] = useState(() => new Set());
+  const weekExportRef = useRef(null);
+  const shelfExportRef = useRef(null);
+
+  const toggleCategory = (category) => {
+    if (category === "Personal") return;
+    setHiddenCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(category)) {
+        next.delete(category);
+      } else {
+        next.add(category);
+      }
+      return next;
+    });
+  };
+
+  const visibleEvents = events.filter(
+    (ev) => ev.category === "Personal" || !hiddenCategories.has(ev.category)
+  );
 
   useEffect(() => {
     api.me().then((data) => {
@@ -64,9 +85,16 @@ export default function App() {
 
       {eventsError && <div className="state-note">Couldn't load events: {eventsError}</div>}
 
-      <WeekCanvas weekStart={weekStart} events={events} />
-      <Legend events={events} />
-      <Shelf currentWeekStart={weekStart} />
+      <div ref={weekExportRef}>
+        <WeekCanvas weekStart={weekStart} events={visibleEvents} />
+        <Legend events={events} hiddenCategories={hiddenCategories} onToggle={toggleCategory} />
+      </div>
+      <ExportBar targetRef={weekExportRef} filenameBase={`rothko-cal-week-${toISODate(weekStart)}`} />
+
+      <div ref={shelfExportRef}>
+        <Shelf currentWeekStart={weekStart} />
+      </div>
+      <ExportBar targetRef={shelfExportRef} filenameBase={`rothko-cal-shelf-${toISODate(weekStart)}`} />
     </div>
   );
 }
