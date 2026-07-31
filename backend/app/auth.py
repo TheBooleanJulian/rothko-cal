@@ -1,3 +1,4 @@
+from authlib.integrations.base_client.errors import OAuthError
 from authlib.integrations.starlette_client import OAuth
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
@@ -25,7 +26,10 @@ async def login(request: Request):
 
 @router.get("/callback")
 async def callback(request: Request):
-    token = await oauth.google.authorize_access_token(request)
+    try:
+        token = await oauth.google.authorize_access_token(request)
+    except OAuthError:
+        return RedirectResponse(url=f"{config.FRONTEND_ORIGIN}?auth_error=1")
     userinfo = token.get("userinfo", {})
     request.session["token"] = {
         "access_token": token.get("access_token"),
