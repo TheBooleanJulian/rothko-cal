@@ -60,7 +60,14 @@ body{
   padding:4px 10px;
   cursor:pointer;
 }
-.week-nav button:hover{border-color:var(--teal); color:var(--teal);}
+.week-nav button:hover:not(:disabled){border-color:var(--teal); color:var(--teal);}
+.week-nav button:disabled{opacity:0.5; cursor:default;}
+.week-nav button.refresh-spinning{color:var(--teal); border-color:var(--teal);}
+.week-nav button.refresh-spinning{animation:spin .8s linear infinite;}
+@keyframes spin{
+  from{transform:rotate(0deg);}
+  to{transform:rotate(360deg);}
+}
 .weeknum{
   font-family:'JetBrains Mono',monospace;
   font-size:22px;
@@ -124,6 +131,7 @@ body{
 .track{
   position:relative;
   height:820px;
+  overflow:hidden;
 }
 
 .block{
@@ -221,6 +229,38 @@ body{
 }
 .export-bar button:hover:not(:disabled){border-color:var(--teal); color:var(--teal);}
 .export-bar button:disabled{opacity:0.5; cursor:default;}
+
+/* ---- export frame (off-screen, captured by html-to-image) ---- */
+.export-frame{
+  position:fixed;
+  left:-10000px;
+  top:0;
+  width:1600px;
+  aspect-ratio:1/1;
+  box-sizing:border-box;
+  background:var(--void);
+  padding:64px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.export-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  border-bottom:1px solid var(--line);
+  padding-bottom:20px;
+  margin-bottom:32px;
+  flex-shrink:0;
+}
+.export-header-left{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.export-body{
+  flex-shrink:0;
+}
 
 /* ---- journal shelf ---- */
 .shelf-heading{

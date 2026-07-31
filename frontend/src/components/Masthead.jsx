@@ -1,6 +1,6 @@
 import { MONTH_NAMES, addDays, weekDays, weekNumber } from "../dateUtils";
 
-export default function Masthead({ weekStart, onPrevWeek, onNextWeek, user, onLogout }) {
+export default function Masthead({ weekStart, onPrevWeek, onNextWeek, onRefresh, refreshing, user, onLogout }) {
   const days = weekDays(weekStart);
   const first = days[0];
   const last = days[6];
@@ -21,6 +21,14 @@ export default function Masthead({ weekStart, onPrevWeek, onNextWeek, user, onLo
           <div className="week-nav">
             <button onClick={onPrevWeek} aria-label="Previous week">&larr;</button>
             <button onClick={onNextWeek} aria-label="Next week">&rarr;</button>
+            <button
+              onClick={onRefresh}
+              disabled={refreshing}
+              aria-label="Refresh calendar data"
+              className={refreshing ? "refresh-spinning" : ""}
+            >
+              &#8635;
+            </button>
           </div>
           <div className="weeknum">W{weekNumber(addDays(first, 3))}</div>
         </div>

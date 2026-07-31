@@ -74,7 +74,7 @@ def test_build_week_events_maps_category_and_status_color():
     assert market["day"] == 0
     assert market["start"] == 11.0
     assert market["end"] == 19.0
-    assert market["categoryColor"] == "#0b8043"
+    assert market["categoryColor"] == "#2f6f6b"  # calendar's own backgroundColor wins over the colorId lookup
     assert market["statusColor"] == "#dc2127"
 
     tut = next(e for e in events if e["category"] == "tut")

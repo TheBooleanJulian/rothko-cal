@@ -8,6 +8,7 @@ import WeekCanvas from "./components/WeekCanvas";
 import Legend from "./components/Legend";
 import Shelf from "./components/Shelf";
 import ExportBar from "./components/ExportBar";
+import ExportHeader from "./components/ExportHeader";
 
 export default function App() {
   const [authState, setAuthState] = useState({ loading: true, authenticated: false, user: null });
@@ -15,6 +16,8 @@ export default function App() {
   const [events, setEvents] = useState([]);
   const [eventsError, setEventsError] = useState(null);
   const [hiddenCategories, setHiddenCategories] = useState(() => new Set());
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
   const weekExportRef = useRef(null);
   const shelfExportRef = useRef(null);
 
@@ -49,6 +52,7 @@ export default function App() {
     if (!authState.authenticated) return;
     let cancelled = false;
     setEventsError(null);
+    setRefreshing(true);
     api
       .events(toISODate(weekStart))
       .then((data) => {
@@ -59,11 +63,12 @@ export default function App() {
           setEvents(data.events);
         }
       })
-      .catch((err) => !cancelled && setEventsError(err.message));
+      .catch((err) => !cancelled && setEventsError(err.message))
+      .finally(() => !cancelled && setRefreshing(false));
     return () => {
       cancelled = true;
     };
-  }, [authState.authenticated, weekStart]);
+  }, [authState.authenticated, weekStart, refreshKey]);
 
   if (authState.loading) {
     return <div className="state-note">Loading…</div>;
@@ -80,21 +85,27 @@ export default function App() {
         user={authState.user}
         onPrevWeek={() => setWeekStart((d) => addDays(d, -7))}
         onNextWeek={() => setWeekStart((d) => addDays(d, 7))}
+        onRefresh={() => setRefreshKey((k) => k + 1)}
+        refreshing={refreshing}
         onLogout={() => api.logout().then(() => setAuthState({ loading: false, authenticated: false, user: null }))}
       />
 
       {eventsError && <div className="state-note">Couldn't load events: {eventsError}</div>}
 
-      <div ref={weekExportRef}>
-        <WeekCanvas weekStart={weekStart} events={visibleEvents} />
-        <Legend events={events} hiddenCategories={hiddenCategories} onToggle={toggleCategory} />
-      </div>
+      <WeekCanvas weekStart={weekStart} events={visibleEvents} />
+      <Legend events={events} hiddenCategories={hiddenCategories} onToggle={toggleCategory} />
       <ExportBar targetRef={weekExportRef} filenameBase={`rothko-cal-week-${toISODate(weekStart)}`} />
 
-      <div ref={shelfExportRef}>
-        <Shelf currentWeekStart={weekStart} />
-      </div>
+      <Shelf currentWeekStart={weekStart} refreshKey={refreshKey} exportRef={shelfExportRef} />
       <ExportBar targetRef={shelfExportRef} filenameBase={`rothko-cal-shelf-${toISODate(weekStart)}`} />
+
+      <div ref={weekExportRef} className="export-frame">
+        <ExportHeader weekStart={weekStart} />
+        <div className="export-body">
+          <WeekCanvas weekStart={weekStart} events={visibleEvents} />
+          <Legend events={events} hiddenCategories={hiddenCategories} />
+        </div>
+      </div>
     </div>
   );
 }

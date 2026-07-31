@@ -38,11 +38,20 @@ def day_index(d: date, week_start: date) -> int:
 
 
 def resolve_category_color(calendar_id: str, calendar_colors: dict, calendar_list_entry: dict) -> str:
-    """calendar_colors is the 'calendar' section of colors().get() -> {colorId: {background, foreground}}."""
+    """calendar_colors is the 'calendar' section of colors().get() -> {colorId: {background, foreground}}.
+
+    calendarListEntry.backgroundColor is the color Google Calendar actually renders and is
+    authoritative; the colorId -> colors().get() lookup is only a fallback for entries that
+    for some reason don't carry a resolved backgroundColor of their own (colorId's palette
+    index can otherwise drift out of sync with backgroundColor, e.g. after a UI custom-color change).
+    """
+    background = calendar_list_entry.get("backgroundColor")
+    if background:
+        return background
     color_id = calendar_list_entry.get("colorId")
     if color_id and color_id in calendar_colors:
         return calendar_colors[color_id]["background"]
-    return calendar_list_entry.get("backgroundColor", "#5b6270")
+    return "#5b6270"
 
 
 def resolve_status_color(event: dict, event_colors: dict) -> str | None:
