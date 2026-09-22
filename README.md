@@ -30,6 +30,10 @@ The original single-file HTML mockup (`calendar-canvas.html`) is kept in the rep
 - Google Calendar backfill script for reviewing and moving historical events into category-specific calendars
 - Color-mapping documentation separating calendar-level categories from event-level statuses, sourced live from `colors().get()` rather than hardcoded hex values
 
+## Screenshots
+
+![Rothko Cal week view](assets/rothko-cal-week-2026-08-02.png)
+
 ## Tech Stack
 
 | Layer | Choice |
@@ -184,10 +188,10 @@ If you want to keep momentum, the best next move would be:
 
 ## License
 
-Dual licensed:
+This project is dual licensed.
 
-- **Community Edition** — [GNU Affero General Public License v3 (AGPLv3)](LICENSE). Free to use, modify, and self-host. If you distribute a modified version or run it as a network service, you must make the corresponding source available.
-- **Commercial License** — for organisations wanting to embed or distribute without AGPLv3 obligations. See [COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md).
+- Community Edition — [GNU Affero General Public License v3 (AGPLv3)](LICENSE). Free to use, modify, and self-host. If you distribute a modified version or run it as a network service, you must make the corresponding source available.
+- Commercial License — for organisations that want to embed, modify, or distribute this software without AGPLv3's obligations. See [COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md).
 
 ---
 
