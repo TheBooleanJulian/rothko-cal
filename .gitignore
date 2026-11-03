@@ -4,3 +4,4 @@ backend/**/__pycache__/
 backend/.env
 backend/.pytest_cache/
 frontend/.env
+.wrangler/

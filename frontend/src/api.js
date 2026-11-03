@@ -1,4 +1,6 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? "https://rothko-cal-backend.thebooleanjulian.dev" : "http://localhost:8000");
 const TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 async function apiGet(path) {
