@@ -41,7 +41,8 @@ The original single-file HTML mockup (`calendar-canvas.html`) is kept in the rep
 | Backend API | Python (FastAPI), Google Calendar API via `google-api-python-client`, OAuth via Authlib |
 | Frontend | React + Vite |
 | Backfill script | Python |
-| Deployment | Zeabur (two services: `backend/`, `frontend/`) |
+| Production API | Cloudflare Worker (`worker/`), a JS port of the FastAPI backend: same routes, same session cookie |
+| Deployment | One Cloudflare Worker serving the frontend and the API (`wrangler.jsonc`) |
 
 ## Project Structure
 
@@ -57,6 +58,8 @@ rothko-cal/
 |-- frontend/                      # React + Vite app — the real calendar canvas
 |   |-- src/
 |   `-- .env.example
+|-- worker/                        # production API on Cloudflare Workers (port of backend/app) + tests
+|-- wrangler.jsonc
 |-- calendar-canvas.html           # original static mockup, kept as design reference
 |-- backfill_calendar_categories.py
 |-- CALENDAR_COLORS.md
@@ -94,13 +97,18 @@ npm run dev
 
 Open the printed `localhost:5173` URL, sign in with Google, and you should see your real week.
 
-## Deploying (Zeabur)
+## Deploying (Cloudflare Workers)
 
-Deploy `backend/` and `frontend/` as two separate Zeabur services from this repo:
+One Worker (`wrangler.jsonc`, code in `worker/`) serves both hostnames: the built frontend at
+`rothko-cal.thebooleanjulian.dev` and `/auth/*` + `/api/*` at `rothko-cal-backend.thebooleanjulian.dev`, which is the
+redirect URI registered on the Google OAuth client. `npx wrangler deploy` builds the frontend first (`build.command`).
 
-- **backend** — Docker service using `backend/Dockerfile`. Set env vars `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` (`https://<backend-domain>/auth/callback`), `SESSION_SECRET`, `FRONTEND_ORIGIN` (`https://<frontend-domain>`).
-- **frontend** — static/Vite service, root `frontend/`. Set `VITE_API_URL` to the backend's public URL.
-- Add the real backend callback URL as an authorized redirect URI on the Google OAuth client once you know the deployed domain.
+- Secrets: `npx wrangler secret put GOOGLE_CLIENT_ID` (and `GOOGLE_CLIENT_SECRET`, `SESSION_SECRET`).
+- Vars in `wrangler.jsonc`: `GOOGLE_REDIRECT_URI`, `FRONTEND_ORIGIN`.
+- Tests: `cd worker && node --test` (the normalization tests from `backend/tests`, ported, plus OAuth/session/API routes).
+- `/healthz` reports whether the secrets are set.
+
+`backend/` (FastAPI) is still the local-dev server and the reference implementation; the Worker mirrors it.
 
 ## Quick overview
 

@@ -1,0 +1,27 @@
+{
+  // Rothko Cal on Cloudflare Workers: worker/ (port of backend/app, FastAPI) + frontend/dist as static assets.
+  // Secrets (npx wrangler secret put …): GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, SESSION_SECRET.
+  // The production frontend calls https://rothko-cal-backend.thebooleanjulian.dev (frontend/src/api.js).
+  "name": "rothko-cal",
+  "account_id": "c580c4403524273d1bece674117472dd",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "build": { "command": "npm ci --prefix frontend && npm run build --prefix frontend" },
+  "assets": {
+    "directory": "./frontend/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/auth/*", "/api/*", "/healthz"]
+  },
+  "vars": {
+    "GOOGLE_REDIRECT_URI": "https://rothko-cal-backend.thebooleanjulian.dev/auth/callback",
+    "FRONTEND_ORIGIN": "https://rothko-cal.thebooleanjulian.dev"
+  },
+  // Cutover: uncomment once the three secrets are set (both hosts override the Zeabur wildcard; remove to roll back).
+  // "routes": [
+  //   { "pattern": "rothko-cal.thebooleanjulian.dev", "custom_domain": true },
+  //   { "pattern": "rothko-cal-backend.thebooleanjulian.dev", "custom_domain": true }
+  // ],
+  "observability": { "enabled": true }
+}
